@@ -1,5 +1,6 @@
 // api/yt-search.js
 // Função Serverless da Vercel para buscar vídeos no YouTube por título
+// Usa a variável de ambiente YT_API_KEY (definida na Vercel)
 
 export default async function handler(req, res) {
   try {
@@ -15,7 +16,7 @@ export default async function handler(req, res) {
 
     if (!q || q.trim() === "") {
       return res.status(400).json({
-        error: "Parâmetro 'q' é obrigatório. Ex: /api/yt-search?q=Titulo"
+        error: "Parâmetro 'q' é obrigatório. Exemplo: /api/yt-search?q=Titulo"
       });
     }
 
@@ -38,11 +39,14 @@ export default async function handler(req, res) {
     }
 
     const results = (data.items || []).map((item) => ({
-      videoId: item.id?.videoId,
-      title: item.snippet?.title,
-      channel: item.snippet?.channelTitle,
-      publishedAt: item.snippet?.publishedAt,
+      videoId: item.id?.videoId || null,
+      title: item.snippet?.title || null,
+      channel: item.snippet?.channelTitle || null,
+      publishedAt: item.snippet?.publishedAt || null,
       thumbnail: item.snippet?.thumbnails?.high?.url
+        || item.snippet?.thumbnails?.medium?.url
+        || item.snippet?.thumbnails?.default?.url
+        || null
     }));
 
     return res.status(200).json({
